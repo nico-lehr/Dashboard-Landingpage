@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triathlon Performance Dashboard – Open Source & Privacy-First</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --surface-1:      #1c1c1b;
+    --page:           #101010;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #8f8d86;
+    --grid:           #2c2c2a;
+    --baseline:       #3a3a38;
+    --border:         rgba(255,255,255,0.08);
+    --card-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.4), 0 16px 36px rgba(0,0,0,0.5);
+    --accent:         #3987e5;
+    --accent-wash:    rgba(57,135,229,0.16);
+
+    --c-schwimmen: #199e70;
+    --c-rad:       #3987e5;
+    --c-laufen:    #d95926;
+    --c-sonstiges: #6f6d66;
+
+    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f5f5f3;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.08);
+    --card-shadow:    0 1px 2px rgba(11,11,11,0.04), 0 8px 24px rgba(11,11,11,0.05);
+    --card-shadow-hover: 0 4px 10px rgba(11,11,11,0.06), 0 16px 36px rgba(11,11,11,0.09);
+    --accent:         #2a78d6;
+    --accent-wash:    rgba(42,120,214,0.10);
+
+    --c-schwimmen: #1baf7a;
+    --c-rad:       #2a78d6;
+    --c-laufen:    #eb6834;
+    --c-sonstiges: #a6a49c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-stack);
+    background: var(--page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+
+  /* Parallax Ambient Background Spheres */
+  .parallax-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.18;
+    transition: transform 0.1s cubic-bezier(0.1, 1, 0.1, 1);
+    will-change: transform;
+  }
+
+  .glow-1 {
+    width: 500px; height: 500px;
+    background: var(--c-schwimmen);
+    top: -100px; left: -100px;
+  }
+  .glow-2 {
+    width: 600px; height: 600px;
+    background: var(--c-rad);
+    top: 30%; right: -150px;
+  }
+  .glow-3 {
+    width: 550px; height: 550px;
+    background: var(--c-laufen);
+    bottom: -100px; left: 20%;
+  }
+
+  /* Layout Container */
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header Navigation */
+  header.navbar {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+    background: rgba(16, 16, 16, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  [data-theme="light"] header.navbar {
+    background: rgba(252, 252, 251, 0.85);
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .logo-dots {
+    display: flex;
+    gap: 5px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; transition: transform 0.2s ease; }
+  .logo:hover .dot { transform: scale(1.25); }
+  .dot.swim { background: var(--c-schwimmen); }
+  .dot.bike { background: var(--c-rad); }
+  .dot.run  { background: var(--c-laufen); }
+
+  .nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 550;
+    transition: color 0.15s ease;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+
+  /* Control Toggles */
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .toggle-btn {
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 650;
+    padding: 5px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .toggle-btn.active {
+    background: var(--text-primary);
+    color: var(--page);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  /* Action Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 4px 14px var(--accent-wash);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(42,120,214,0.35);
+  }
+  .btn-primary:active { transform: translateY(0) scale(0.97); }
+
+  .btn-secondary {
+    background: var(--surface-1);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+  }
+  .btn-secondary:hover {
+    background: var(--grid);
+    transform: translateY(-2px);
+  }
+  .btn-secondary:active { transform: translateY(0) scale(0.97); }
+
+  /* Hero Section */
+  .hero {
+    padding: 90px 0 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  .badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    font-weight: 600;
+    box-shadow: var(--card-shadow);
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  .badge-pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--c-schwimmen);
+    box-shadow: 0 0 0 0 rgba(27, 175, 122, 0.5);
+    animation: pulseGlow 2s infinite;
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(27, 175, 122, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(27, 175, 122, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(27, 175, 122, 0); }
+  }
+
+  h1.hero-title {
+    font-size: 3.4rem;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    font-weight: 750;
+    margin-bottom: 22px;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+  }
+
+  .hero-title .gradient-text {
+    background: linear-gradient(135deg, var(--c-schwimmen), var(--c-rad), var(--c-laufen));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p.hero-sub {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    max-width: 680px;
+    margin: 0 auto 38px;
+    font-weight: 450;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    animation: fadeSlideUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+  }
+
+  /* Interactive Parallax Dashboard Mockup */
+  .hero-mockup-wrap {
+    margin-top: 60px;
+    perspective: 1000px;
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.4s both;
+  }
+
+  .mockup-card {
+    background: var(--surface-1);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    padding: 16px;
+    text-align: left;
+    transition: transform 0.2s cubic-bezier(0.1, 1, 0.1, 1), box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .mockup-card:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .mockup-window-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+
+  .window-btn { width: 11px; height: 11px; border-radius: 50%; opacity: 0.7; }
+  .window-btn.close { background: #e34948; }
+  .window-btn.min { background: #fab219; }
+  .window-btn.max { background: #1baf7a; }
+
+  .mockup-inner {
+    background: var(--page);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .mockup-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .preview-tile {
+    background: var(--surface-1);
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .preview-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .preview-tile .sport-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .preview-tile .val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .preview-tile .sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Micro Multiples Section */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 90px 0;
+  }
+
+  .feature-card {
+    background: var(--surface-1);
+    padding: 32px 26px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .feature-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 18px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.15rem;
+    font-weight: 650;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-card p {
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* Section Title Standard */
+  .section-title {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .section-title h2 {
+    font-size: 2.1rem;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .section-title p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+
+  /* Comparison Section */
+  .comparison-section {
+    padding: 40px 0 80px;
+  }
+
+  .table-card {
+    background: var(--surface-1);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+
+  table.comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  table.comp-table th, table.comp-table td {
+    padding: 18px 26px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  table.comp-table th {
+    background: var(--page);
+    font-weight: 650;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+  }
+
+  table.comp-table tbody tr {
+    transition: background 0.15s ease;
+  }
+  table.comp-table tbody tr:hover {
+    background: var(--page);
+  }
+
+  table.comp-table tr:last-child td { border-bottom: none; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .status-badge.good {
+    background: rgba(25, 158, 112, 0.15);
+    color: var(--c-schwimmen);
+  }
+
+  .status-badge.bad {
+    background: rgba(227, 73, 72, 0.12);
+    color: #e34948;
+  }
+
+  /* Roadmap / Logbook Section */
+  .roadmap-section {
+    padding: 40px 0 100px;
+  }
+
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .roadmap-card {
+    background: var(--surface-1);
+    padding: 36px 30px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+  }
+
+  .roadmap-card h3 {
+    font-size: 1.25rem;
+    font-weight: 650;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .roadmap-list {
+    list-style: none;
+  }
+
+  .roadmap-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 0.94rem;
+    line-height: 1.5;
+  }
+
+  .roadmap-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0; top: 0;
+    color: var(--c-schwimmen);
+    font-weight: 800;
+  }
+
+  .roadmap-list.future li::before {
+    content: "→";
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    background: var(--surface-1);
+  }
+
+  /* Keyframe Animations */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Language Switch Visibility Helper */
+  .lang-en { display: none; }
+  [lang="en"] .lang-de { display: none; }
+  [lang="en"] .lang-en { display: inline; }
+  [lang="en"] div.lang-en, [lang="en"] span.lang-en, [lang="en"] p.lang-en { display: block; }
+
+  /* Mobile & Tablet Responsiveness Enhancements */
+  .table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .container { padding: 0 18px; }
+    header.navbar { padding: 14px 0; }
+    .nav-inner { flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+    .nav-links { gap: 12px; flex-wrap: wrap; width: 100%; justify-content: space-between; margin-top: 8px; }
+    
+    h1.hero-title { font-size: clamp(2.1rem, 6vw, 3rem); }
+    p.hero-sub { font-size: 1.05rem; }
+    .hero { padding: 50px 0 40px; }
+    
+    .hero-actions { flex-direction: column; width: 100%; max-width: 320px; margin: 0 auto; gap: 12px; }
+    .btn { width: 100%; justify-content: center; }
+
+    .feature-grid, .mockup-stats-grid, .roadmap-grid {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .mockup-inner { padding: 16px; }
+    .preview-tile { padding: 16px; }
+    .roadmap-card { padding: 24px 20px; }
+    .feature-card { padding: 24px 20px; }
+    
+    table.comp-table th, table.comp-table td {
+      padding: 14px 16px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 480px) {
+    h1.hero-title { font-size: 1.85rem; }
+    .badge-chip { font-size: 0.75rem; padding: 5px 12px; }
+    .control-group { order: 3; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Parallax Background Glows -->
+  <div class="parallax-bg">
+    <div class="glow-orb glow-1" id="glow1"></div>
+    <div class="glow-orb glow-2" id="glow2"></div>
+    <div class="glow-orb glow-3" id="glow3"></div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-dots">
+          <span class="dot swim"></span>
+          <span class="dot bike"></span>
+          <span class="dot run"></span>
+        </div>
+        TriDashboard
+      </a>
+
+      <div class="nav-links">
+        <a href="#features">
+          <span class="lang-de">Features</span>
+          <span class="lang-en">Features</span>
+        </a>
+        <a href="#vergleich">
+          <span class="lang-de">Vergleich</span>
+          <span class="lang-en">Comparison</span>
+        </a>
+        <a href="#roadmap">
+          <span class="lang-de">Logbuch</span>
+          <span class="lang-en">Roadmap</span>
+        </a>
+
+        <!-- Controls (Theme & Lang) -->
+        <div class="control-group">
+          <button class="toggle-btn active" id="btn-theme-toggle" title="Design wechseln">🌙</button>
+          <button class="toggle-btn" id="btn-lang-de">DE</button>
+          <button class="toggle-btn" id="btn-lang-en">EN</button>
+        </div>
+
+        <a href="dashboard.html" class="btn btn-primary">
+          <span class="lang-de">App Starten</span>
+          <span class="lang-en">Launch App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      
+      <div class="badge-chip">
+        <span class="badge-pulse"></span>
+        <span class="lang-de">100% Open Source & Privacy-First</span>
+        <span class="lang-en">100% Open Source & Privacy-First</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="lang-de">Deine Triathlon Performance.<br><span class="gradient-text">Lokal. Präzise. Ohne Abo.</span></span>
+        <span class="lang-en">Your Triathlon Performance.<br><span class="gradient-text">Local. Precise. Subscription-Free.</span></span>
+      </h1>
+
+      <p class="hero-sub">
+        <span class="lang-de">Ein hochmodernes Trainingsdashboard für deine <code>.FIT</code>-Dateien. Ausgewertet direkt in deinem Browser – ohne Datenweitergabe an fremde Server.</span>
+        <span class="lang-en">A modern training dashboard for your <code>.FIT</code> files. Evaluated directly in your browser – with zero data transmitted to cloud servers.</span>
+      </p>
+
+      <div class="hero-actions">
+        <a href="dashboard.html" class="btn btn-primary">
+          <span class="lang-de">Dashboard Ausprobieren</span>
+          <span class="lang-en">Try Live Dashboard</span>
+        </a>
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span class="lang-de">GitHub Repository</span>
+          <span class="lang-en">GitHub Repository</span>
+        </a>
+      </div>
+
+      <!-- Interactive 3D Parallax Card -->
+      <div class="hero-mockup-wrap">
+        <div class="mockup-card" id="tiltCard">
+          <div class="mockup-window-bar">
+            <div class="window-btn close"></div>
+            <div class="window-btn min"></div>
+            <div class="window-btn max"></div>
+            <span style="font-size: 11.5px; color: var(--text-muted); margin-left: 8px; font-weight: 600;">Triathlon_Performance_Dashboard.app</span>
+          </div>
+          <div class="mockup-inner">
+            <div class="mockup-stats-grid">
+              
+              <div class="preview-tile" style="border-top: 3px solid var(--c-schwimmen);">
+                <div class="sport-tag" style="color: var(--c-schwimmen);">
+                  <span class="dot swim"></span>
+                  <span class="lang-de">Schwimmen</span>
+                  <span class="lang-en">Swimming</span>
+                </div>
+                <div class="val">1.500 m</div>
+                <div class="sub">Pace: 2:04 / 100m · Swolf: 38</div>
+              </div>
+
+              <div class="preview-tile" style="border-top: 3px solid var(--c-rad);">
+                <div class="sport-tag" style="color: var(--c-rad);">
+                  <span class="dot bike"></span>
+                  <span class="lang-de">Radfahren</span>
+                  <span class="lang-en">Cycling</span>
+                </div>
+                <div class="val">42,7 km</div>
+                <div class="sub">Ø 29,3 km/h · CTL: 62</div>
+              </div>
+
+              <div class="preview-tile" style="border-top: 3px solid var(--c-laufen);">
+                <div class="sport-tag" style="color: var(--c-laufen);">
+                  <span class="dot run"></span>
+                  <span class="lang-de">Laufen</span>
+                  <span class="lang-en">Running</span>
+                </div>
+                <div class="val">10,1 km</div>
+                <div class="sub">Pace: 5:37 / km · HF Max: 195</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Feature Grid -->
+  <section class="container" id="features">
+    <div class="feature-grid">
+      
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(25, 158, 112, 0.15); color: var(--c-schwimmen);">🔒</div>
+        <h3>
+          <span class="lang-de">Maximaler Datenschutz</span>
+          <span class="lang-en">Maximum Privacy</span>
+        </h3>
+        <p>
+          <span class="lang-de">Deine Sensordaten und GPS-Koordinaten bleiben 100% lokal auf deinem Computer. Kein Upload auf externe Server.</span>
+          <span class="lang-en">Your sensor data and GPS coordinates remain 100% local on your computer. Zero cloud uploads required.</span>
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: var(--accent-wash); color: var(--c-rad);">📈</div>
+        <h3>
+          <span class="lang-de">TrainingPeaks PMC Methodik</span>
+          <span class="lang-en">PMC Load Analytics</span>
+        </h3>
+        <p>
+          <span class="lang-de">Präzise Berechnung deiner Grundlagenfitness (CTL), kurzfristigen Ermüdung (ATL) und tagesaktuellen Form (TSB).</span>
+          <span class="lang-en">Accurate calculation of Chronic Training Load (CTL), Acute Training Load (ATL), and Training Stress Balance (TSB).</span>
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(217, 89, 38, 0.15); color: var(--c-laufen);">🤖</div>
+        <h3>
+          <span class="lang-de">KI-Coach via Ollama</span>
+          <span class="lang-en">Local AI Coach</span>
+        </h3>
+        <p>
+          <span class="lang-de">Integrierter Trainings-Coach, der auf Wunsch über dein lokales Ollama KI-Modell Empfehlungen für Wettkämpfe generiert.</span>
+          <span class="lang-en">Integrated AI training assistant leveraging your local Ollama LLM setup for private race strategy advice.</span>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section class="comparison-section" id="vergleich">
+    <div class="container">
+      
+      <div class="section-title">
+        <h2>
+          <span class="lang-de">Warum dieses Dashboard?</span>
+          <span class="lang-en">Why Choose This Dashboard?</span>
+        </h2>
+        <p>
+          <span class="lang-de">Der direkte Vergleich mit kommerziellen Sport-Plattformen</span>
+          <span class="lang-en">Direct comparison with commercial endurance platforms</span>
+        </p>
+      </div>
+
+      <div class="table-card table-scroll-wrapper">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>TriDashboard (Open Source)</th>
+              <th>Strava / TrainingPeaks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><span class="lang-de">Kosten</span><span class="lang-en">Cost</span></strong></td>
+              <td><span class="status-badge good">✓ 100% Free / Gratis</span></td>
+              <td><span class="status-badge bad">✕ Monthly Subscription / Abo</span></td>
+            </tr>
+            <tr>
+              <td><strong><span class="lang-de">Datenschutz & GPS</span><span class="lang-en">Data Privacy</span></strong></td>
+              <td><span class="status-badge good">✓ Client-Side / 100% Lokal</span></td>
+              <td><span class="status-badge bad">✕ Stored on Cloud Servers</span></td>
+            </tr>
+            <tr>
+              <td><strong><span class="lang-de">Quellcode</span><span class="lang-en">Source Code</span></strong></td>
+              <td><span class="status-badge good">✓ Open Source (MIT)</span></td>
+              <td><span class="status-badge bad">✕ Proprietary / Geschlossen</span></td>
+            </tr>
+            <tr>
+              <td><strong><span class="lang-de">Offline-Nutzung</span><span class="lang-en">Offline Access</span></strong></td>
+              <td><span class="status-badge good">✓ Vollständig Offline-fähig</span></td>
+              <td><span class="status-badge bad">✕ Requires Internet</span></td>
+            </tr>
+            <tr>
+              <td><strong><span class="lang-de">Lokale KI-Integration</span><span class="lang-en">Local AI Integration</span></strong></td>
+              <td><span class="status-badge good">✓ Ollama / Llama 3.1</span></td>
+              <td><span class="status-badge bad">✕ None / Cloud-AI Only</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Roadmap / Logbook Section -->
+  <section class="roadmap-section" id="roadmap">
+    <div class="container">
+      
+      <div class="section-title">
+        <h2>
+          <span class="lang-de">Entwicklungs-Logbuch</span>
+          <span class="lang-en">Project Logbook & Roadmap</span>
+        </h2>
+        <p>
+          <span class="lang-de">Transparenter Stand der Entwicklung</span>
+          <span class="lang-en">Transparent overview of milestones & future plans</span>
+        </p>
+      </div>
+
+      <div class="roadmap-grid">
+        
+        <!-- Already Done -->
+        <div class="roadmap-card">
+          <h3>
+            <span style="color: var(--c-schwimmen);">✓</span>
+            <span class="lang-de">Bereits Umgesetzt</span>
+            <span class="lang-en">Completed Features</span>
+          </h3>
+          <ul class="roadmap-list">
+            <li>
+              <span class="lang-de">Direktes Auslesen von <code>.FIT</code>-Dateien im Browser</span>
+              <span class="lang-en">Direct browser parsing for native <code>.FIT</code> files</span>
+            </li>
+            <li>
+              <span class="lang-de">Performance Management Chart (CTL, ATL, TSB & ACWR)</span>
+              <span class="lang-en">Performance Management Chart (CTL, ATL, TSB & ACWR)</span>
+            </li>
+            <li>
+              <span class="lang-de">Interaktiver Trainingskalender mit Monatsübersicht</span>
+              <span class="lang-en">Interactive monthly training calendar & summaries</span>
+            </li>
+            <li>
+              <span class="lang-de">Persönliche Rekorde-Ansicht je Sportart</span>
+              <span class="lang-en">Personal best records breakdown by discipline</span>
+            </li>
+            <li>
+              <span class="lang-de">Lokale KI-Anbindung über Ollama</span>
+              <span class="lang-en">Local LLM coach integration via Ollama</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Future Features -->
+        <div class="roadmap-card">
+          <h3>
+            <span style="color: var(--accent);">→</span>
+            <span class="lang-de">Zukünftige Meilensteine</span>
+            <span class="lang-en">Future Milestones</span>
+          </h3>
+          <ul class="roadmap-list future">
+            <li>
+              <span class="lang-de">Personalisierte KI-Coaching Empfehlungen (Lokal & Cloud-API)</span>
+              <span class="lang-en">Personalized AI Coaching Insights (Local & Cloud API)</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Optional wählbar: Völlig lokal via Ollama ODER über Cloud-APIs (Claude / Gemini) mit extrem günstigen Mini-Modellen für noch präzisere Analysen.</span>
+                <span class="lang-en">Optionally choose between fully local Ollama or cloud APIs (Claude / Gemini) using lightweight, ultra-low-cost models for deeper insights.</span>
+              </small>
+            </li>
+            <li>
+              <span class="lang-de">Automatische Strava & Garmin API Anbindung</span>
+              <span class="lang-en">Automated Strava & Garmin Connect API sync</span>
+            </li>
+            <li>
+              <span class="lang-de">Kostenlose Cloud-Option via Supabase für Multi-Device Access</span>
+              <span class="lang-en">Optional free cloud sync via Supabase for cross-device access</span>
+            </li>
+            <li>
+              <span class="lang-de">Erweiterte Auswertung von Wahoo & Garmin Leistungsmessern</span>
+              <span class="lang-en">Advanced power meter metrics for cycling & running</span>
+            </li>
+            <li>
+              <span class="lang-de">PDF-Export für individuelle Trainingspläne</span>
+              <span class="lang-en">PDF export for custom training logs & reports</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>
+        <span class="lang-de">Triathlon Performance Dashboard · Open Source Project</span>
+        <span class="lang-en">Triathlon Performance Dashboard · Open Source Project</span>
+      </p>
+    </div>
+  </footer>
+
+  <!-- JavaScript for Interactions & Parallax -->
+  <script>
+    // Theme Switcher Logic
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('btn-theme-toggle');
+
+    function setTheme(theme) {
+      htmlEl.setAttribute('data-theme', theme);
+      themeBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+      localStorage.setItem('tri_landing_theme', theme);
+    }
+
+    themeBtn.addEventListener('click', () => {
+      const current = htmlEl.getAttribute('data-theme') || 'dark';
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // Language Switcher Logic
+    const langDeBtn = document.getElementById('btn-lang-de');
+    const langEnBtn = document.getElementById('btn-lang-en');
+
+    function setLanguage(lang) {
+      htmlEl.setAttribute('lang', lang);
+      if (lang === 'de') {
+        langDeBtn.classList.add('active');
+        langEnBtn.classList.remove('active');
+      } else {
+        langEnBtn.classList.add('active');
+        langDeBtn.classList.remove('active');
+      }
+      localStorage.setItem('tri_landing_lang', lang);
+    }
+
+    langDeBtn.addEventListener('click', () => setLanguage('de'));
+    langEnBtn.addEventListener('click', () => setLanguage('en'));
+
+    // Initialize Preferences
+    const savedTheme = localStorage.getItem('tri_landing_theme') || 'dark';
+    const savedLang = localStorage.getItem('tri_landing_lang') || 'de';
+    setTheme(savedTheme);
+    setLanguage(savedLang);
+
+    // Subtle Mouse Parallax & 3D Tilt Effect
+    const tiltCard = document.getElementById('tiltCard');
+    const glow1 = document.getElementById('glow1');
+    const glow2 = document.getElementById('glow2');
+    const glow3 = document.getElementById('glow3');
+
+    document.addEventListener('mousemove', (e) => {
+      const { clientX, clientY } = e;
+      const xPos = (clientX / window.innerWidth - 0.5);
+      const yPos = (clientY / window.innerHeight - 0.5);
+
+      // Subtle Background Parallax
+      if (glow1 && glow2 && glow3) {
+        glow1.style.transform = `translate(${xPos * 40}px, ${yPos * 40}px)`;
+        glow2.style.transform = `translate(${xPos * -50}px, ${yPos * -50}px)`;
+        glow3.style.transform = `translate(${xPos * 30}px, ${yPos * -30}px)`;
+      }
+
+      // 3D Card Tilt
+      if (tiltCard) {
+        const rect = tiltCard.getBoundingClientRect();
+        const cardX = clientX - rect.left - rect.width / 2;
+        const cardY = clientY - rect.top - rect.height / 2;
+        
+        // Only tilt when mouse is near/over hero section
+        if (clientY < rect.bottom + 200 && clientY > rect.top - 200) {
+          const rotateX = (cardY / rect.height) * -12;
+          const rotateY = (cardX / rect.width) * 12;
+          tiltCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+      }
+    });
+
+    document.addEventListener('mouseleave', () => {
+      if (tiltCard) {
+        tiltCard.style.transform = `rotateX(0deg) rotateY(0deg)`;
+      }
+    });
+  </script>
+</body>
+</html>
