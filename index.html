@@ -707,7 +707,7 @@
           <span class="lang-de">Dashboard Ausprobieren</span>
           <span class="lang-en">Try Live Dashboard</span>
         </a>
-        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-secondary">
+        <a href="https://github.com/nico-lehr/TriathlonTrainingsDashboard" target="_blank" rel="noopener" class="btn btn-secondary">
           <span class="lang-de">GitHub Repository</span>
           <span class="lang-en">GitHub Repository</span>
         </a>
@@ -794,12 +794,48 @@
       <div class="feature-card">
         <div class="feature-icon" style="background: rgba(217, 89, 38, 0.15); color: var(--c-laufen);">🤖</div>
         <h3>
-          <span class="lang-de">KI-Coach via Ollama</span>
-          <span class="lang-en">Local AI Coach</span>
+          <span class="lang-de">KI-Coach — lokal oder Cloud</span>
+          <span class="lang-en">AI Coach — Local or Cloud</span>
         </h3>
         <p>
-          <span class="lang-de">Integrierter Trainings-Coach, der auf Wunsch über dein lokales Ollama KI-Modell Empfehlungen für Wettkämpfe generiert.</span>
-          <span class="lang-en">Integrated AI training assistant leveraging your local Ollama LLM setup for private race strategy advice.</span>
+          <span class="lang-de">Ein Coach, der deine Einheiten auswertet und Trainingspläne erstellt — wahlweise komplett lokal über Ollama oder über einen Cloud-Schlüssel. Lokal verlässt kein Wert deinen Rechner.</span>
+          <span class="lang-en">A coach that reviews your sessions and builds training plans — either fully local via Ollama or through a cloud key. Run locally, nothing ever leaves your machine.</span>
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(37, 99, 235, 0.15); color: var(--c-rad);">⌚</div>
+        <h3>
+          <span class="lang-de">Automatischer Garmin-Sync</span>
+          <span class="lang-en">Automatic Garmin Sync</span>
+        </h3>
+        <p>
+          <span class="lang-de">Ein Doppelklick holt neue Trainings direkt aus Garmin Connect — als Original-Dateien, also mit Sekundenkurven, Leistung, Schwimmbahnen und Laufdynamik. Dein Passwort wird dabei nie gespeichert.</span>
+          <span class="lang-en">One double-click pulls new activities straight from Garmin Connect — as original files, including per-second curves, power, swim lengths and running dynamics. Your password is never stored.</span>
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(220, 38, 38, 0.15); color: var(--c-laufen);">❤️</div>
+        <h3>
+          <span class="lang-de">Erholung &amp; Gesundheit</span>
+          <span class="lang-en">Recovery &amp; Health</span>
+        </h3>
+        <p>
+          <span class="lang-de">Schlaf, HRV, Ruhepuls, Body Battery und Gewicht im Verlauf — immer als Abweichung von deinem eigenen Mittel. Denn ein HRV-Wert allein sagt nichts, erst der Vergleich mit dir selbst.</span>
+          <span class="lang-en">Sleep, HRV, resting heart rate, body battery and weight over time — always relative to your own baseline. A single HRV number means nothing; the comparison to yourself does.</span>
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(124, 58, 237, 0.15); color: var(--c-schwimmen);">🚴</div>
+        <h3>
+          <span class="lang-de">Indoor wird fair gewertet</span>
+          <span class="lang-en">Fair Indoor Handling</span>
+        </h3>
+        <p>
+          <span class="lang-de">Rolle und virtuelle Plattformen wie MyWhoosh oder Zwift werden automatisch erkannt. Simulierte Kilometer werden nie gegen echte Straßenfahrten verglichen — indoor zählt die Leistung in Watt.</span>
+          <span class="lang-en">Smart trainers and virtual platforms like MyWhoosh or Zwift are detected automatically. Simulated kilometres are never compared against real road rides — indoors, power in watts is what counts.</span>
         </p>
       </div>
 
@@ -889,24 +925,64 @@
           </h3>
           <ul class="roadmap-list">
             <li>
+              <span class="lang-de">Automatischer Garmin-Connect-Sync</span>
+              <span class="lang-en">Automatic Garmin Connect sync</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Holt Aktivitäten als Original-Dateien plus Schlaf, HRV, Ruhepuls, Body Battery, VO2max und Gewicht. Passwort wird nie gespeichert.</span>
+                <span class="lang-en">Pulls activities as original files plus sleep, HRV, resting HR, body battery, VO2max and weight. Password is never stored.</span>
+              </small>
+            </li>
+            <li>
+              <span class="lang-de">Erholungs- und Gesundheitsdaten mit Verlauf</span>
+              <span class="lang-en">Recovery &amp; health metrics over time</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">HRV und Ruhepuls immer als Abweichung vom eigenen 30-Tage-Mittel — der einzige Vergleich, der bei diesen Werten etwas aussagt.</span>
+                <span class="lang-en">HRV and resting HR always shown against your own 30-day baseline — the only comparison that means anything for these metrics.</span>
+              </small>
+            </li>
+            <li>
               <span class="lang-de">Direktes Auslesen von <code>.FIT</code>-Dateien im Browser</span>
               <span class="lang-en">Direct browser parsing for native <code>.FIT</code> files</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Eigener FIT-Parser, komplett offline und ohne Abhängigkeiten.</span>
+                <span class="lang-en">Hand-written FIT parser, fully offline with zero dependencies.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">Performance Management Chart (CTL, ATL, TSB & ACWR)</span>
-              <span class="lang-en">Performance Management Chart (CTL, ATL, TSB & ACWR)</span>
+              <span class="lang-de">Performance Management Chart (CTL, ATL, TSB &amp; ACWR)</span>
+              <span class="lang-en">Performance Management Chart (CTL, ATL, TSB &amp; ACWR)</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Dazu Trainingsmonotonie nach Foster und der Belastungsfokus nach Seiler.</span>
+                <span class="lang-en">Plus training monotony after Foster and intensity distribution after Seiler.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">Interaktiver Trainingskalender mit Monatsübersicht</span>
-              <span class="lang-en">Interactive monthly training calendar & summaries</span>
+              <span class="lang-de">KI-Coach — lokal über Ollama oder per Cloud-Schlüssel</span>
+              <span class="lang-en">AI coach — local via Ollama or with a cloud key</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Wertet einzelne Einheiten gegen vergleichbare frühere aus und erstellt Trainingspläne.</span>
+                <span class="lang-en">Reviews single sessions against comparable past ones and builds training plans.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">Persönliche Rekorde-Ansicht je Sportart</span>
-              <span class="lang-en">Personal best records breakdown by discipline</span>
+              <span class="lang-de">Indoor- und virtuelles Radtraining wird eigenständig gewertet</span>
+              <span class="lang-en">Indoor and virtual rides handled separately</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Rolle, MyWhoosh und Zwift werden erkannt; simulierte Kilometer fließen nie in Outdoor-Bestzeiten.</span>
+                <span class="lang-en">Smart trainers, MyWhoosh and Zwift are detected; simulated kilometres never enter outdoor records.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">Lokale KI-Anbindung über Ollama</span>
-              <span class="lang-en">Local LLM coach integration via Ollama</span>
+              <span class="lang-de">Trainingskalender, Rekorde, Erfolge und Ernährungsplanung</span>
+              <span class="lang-en">Training calendar, records, achievements and nutrition planning</span>
+            </li>
+            <li>
+              <span class="lang-de">Trainingsplan-Generator mit Race-Readiness-Score</span>
+              <span class="lang-en">Training plan generator with race readiness score</span>
+            </li>
+            <li>
+              <span class="lang-de">Einrichtung per Doppelklick auf dem Mac</span>
+              <span class="lang-en">One double-click setup on macOS</span>
             </li>
           </ul>
         </div>
@@ -920,28 +996,40 @@
           </h3>
           <ul class="roadmap-list future">
             <li>
-              <span class="lang-de">Personalisierte KI-Coaching Empfehlungen (Lokal & Cloud-API)</span>
-              <span class="lang-en">Personalized AI Coaching Insights (Local & Cloud API)</span>
+              <span class="lang-de">Windows-Unterstützung</span>
+              <span class="lang-en">Windows support</span>
               <br><small style="color:var(--text-muted); font-size:0.82rem;">
-                <span class="lang-de">Optional wählbar: Völlig lokal via Ollama ODER über Cloud-APIs (Claude / Gemini) mit extrem günstigen Mini-Modellen für noch präzisere Analysen.</span>
-                <span class="lang-en">Optionally choose between fully local Ollama or cloud APIs (Claude / Gemini) using lightweight, ultra-low-cost models for deeper insights.</span>
+                <span class="lang-de">Das Dashboard selbst läuft dort bereits; es fehlt die Einrichtung und der Sync-Starter.</span>
+                <span class="lang-en">The dashboard itself already runs there; the installer and sync launcher are still missing.</span>
               </small>
             </li>
             <li>
-              <span class="lang-de">Automatische Strava & Garmin API Anbindung</span>
-              <span class="lang-en">Automated Strava & Garmin Connect API sync</span>
+              <span class="lang-de">Nutzung auf iPhone und iPad</span>
+              <span class="lang-en">iPhone and iPad support</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Die Ansicht ist bereits für kleine Bildschirme ausgelegt — geplant ist eine Einzeldatei-Fassung, die sich offline öffnen lässt.</span>
+                <span class="lang-en">The layout already adapts to small screens — a single-file build that opens offline is planned.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">Kostenlose Cloud-Option via Supabase für Multi-Device Access</span>
-              <span class="lang-en">Optional free cloud sync via Supabase for cross-device access</span>
+              <span class="lang-de">Strava-Anbindung</span>
+              <span class="lang-en">Strava integration</span>
             </li>
             <li>
-              <span class="lang-de">Erweiterte Auswertung von Wahoo & Garmin Leistungsmessern</span>
-              <span class="lang-en">Advanced power meter metrics for cycling & running</span>
+              <span class="lang-de">Optionale Synchronisierung zwischen mehreren Geräten</span>
+              <span class="lang-en">Optional sync across multiple devices</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Ausdrücklich freiwillig — die lokale Nutzung ohne Konto bleibt immer der Standard.</span>
+                <span class="lang-en">Strictly opt-in — local use without an account will always remain the default.</span>
+              </small>
             </li>
             <li>
-              <span class="lang-de">PDF-Export für individuelle Trainingspläne</span>
-              <span class="lang-en">PDF export for custom training logs & reports</span>
+              <span class="lang-de">Tiefere Auswertung von Leistungsmessern</span>
+              <span class="lang-en">Deeper power meter analysis</span>
+              <br><small style="color:var(--text-muted); font-size:0.82rem;">
+                <span class="lang-de">Intervall-Erkennung, Leistungs-Dauer-Kurve und Ermüdungsverlauf innerhalb einer Einheit.</span>
+                <span class="lang-en">Interval detection, power-duration curve and intra-session fatigue.</span>
+              </small>
             </li>
           </ul>
         </div>
